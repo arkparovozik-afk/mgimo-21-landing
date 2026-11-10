@@ -1,4 +1,4 @@
-name: Deploy GitHub Pages
+name: Deploy both landing versions
 on:
   push:
     branches: [main]
@@ -20,10 +20,19 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - run: npm run build -- --base=/mgimo-21-landing/feedback/
+      - uses: actions/checkout@v4
+        with:
+          ref: 328fe3909f2f7f33c335696b739b70b9eba1a9f5
+          path: original-version
+      - run: npm ci
+        working-directory: original-version
       - run: npm run build -- --base=/mgimo-21-landing/
+        working-directory: original-version
+      - run: cp -R dist original-version/dist/feedback
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: dist
+          path: original-version/dist
   deploy:
     environment:
       name: github-pages
